@@ -26,37 +26,53 @@ class ListingController extends Controller
                     'priceFrom','priceTo','beds','baths','areaFrom','areaTo'
                 ]);
 
-                $query=Listing::OrderByDesc('created_at');
-                if($filters["priceFrom"] ?? false){
-                    $query->where('price', '>=',$filters['priceFrom']);
-                }
-                if($filters["priceTo"] ?? false)
-                {
-                    $query->where('price','<=',$filters['priceTo']);
-                }
-                if($filters["beds"] ?? false)
-                {
-                    $query->where('beds','=',$filters['beds']);
-                }
-                if($filters["baths"] ?? false)
-                {
-                    $query->where('baths','=',$filters["baths"]);
-                }
-                 if($filters["areaFrom"] ?? false)
-                 {
-                      $query->where("area",'>=',$filters["areaFrom"]);
-                 }
-                 if($filters["areaTo"] ?? false)
-                 {
-                      $query->where('area','<=',$filters["areaTo"]);
-                 }
+
+                // if($filters["priceFrom"] ?? false){
+                //     $query->where('price', '>=',$filters['priceFrom']);
+                // }
+                // if($filters["priceTo"] ?? false)
+                // {
+                //     $query->where('price','<=',$filters['priceTo']);
+                // }
+                // if($filters["beds"] ?? false)
+                // {
+                //     $query->where('beds','=',$filters['beds']);
+                // }
+                // if($filters["baths"] ?? false)
+                // {
+                //     $query->where('baths','=',$filters["baths"]);
+                // }
+                //  if($filters["areaFrom"] ?? false)
+                //  {
+                //       $query->where("area",'>=',$filters["areaFrom"]);
+                //  }
+                //  if($filters["areaTo"] ?? false)
+                //  {
+                //       $query->where('area','<=',$filters["areaTo"]);
+                //  }
 
 
           return inertia(
             'Listing/Index',
             [
                 'filters'=>$filters,
-                'Listings'=>$query
+                'Listings'=>Listing::OrderByDesc('created_at')
+                ->when($filters["priceFrom"] ?? false,
+                fn($query,$value)=>$query->where('price','>=',$value)
+            )->when($filters["priceTo"] ?? false,
+               fn($query,$value)=>$query->where("price" ,"<=",$value)
+            )->when($filters["beds"] ?? false,
+                fn ($query,$value)=>$query->where("beds",(int) $value <6 ? '=': '>=',$value)
+            )->when($filters["baths"] ?? false,
+               fn ($query,$value)=>$query
+               ->where("baths",(int)$value<6 ? '=':'>=',$value)
+            )->when($filters["areaFrom"] ?? false,
+                fn ($query, $value)=>$query
+                 ->where("area",">=",$value)
+            )->when($filters["areaTo"] ?? false,
+             fn($query,$value)=>$query
+             ->where('area',"<=",$value)
+            )
                 ->paginate(10)
                 ->withQueryString()
             ]
