@@ -1,6 +1,8 @@
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 import MainLayout from './Layouts/MainLaout.vue'
+import { ZiggyVue } from 'ziggy-js'; // Correct import
+import '../css/app.css';
 createInertiaApp({
   resolve: name => {
     const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
@@ -11,6 +13,7 @@ createInertiaApp({
   setup({ el, App, props, plugin }) {
     createApp({ render: () => h(App, props) })
       .use(plugin)
+      .use(ZiggyVue, Ziggy)
       .mount(el)
   },
 })
